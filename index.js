@@ -51,8 +51,27 @@ async function run() {
         //the add services
         app.post('/services', async(req, res)=>{
             const addService = req.body;
-            
             const result = await servicesCollection.insertOne(addService);
+            res.send(result)
+        })
+
+        // update the on service
+        app.patch('/services/:id', async(req, res)=>{
+            const id = req.params.id;
+            const data = req.body;
+            const filter = {_id : new ObjectId(id)};
+            const updatedDoc = {
+                $set: data
+            }
+            const result = await servicesCollection.updateOne(filter, updatedDoc)
+            res.send(result)
+        })
+
+        // delete the service
+        app.delete('/services/:id', async(req, res)=>{
+            const id = req.params.id;
+            const query = {_id : new ObjectId(id)}
+            const result = await servicesCollection.deleteOne(query)
             res.send(result)
         })
 
