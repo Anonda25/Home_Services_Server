@@ -29,11 +29,11 @@ async function run() {
         await client.connect();
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
-        
+
         // get the servise
-        app.get('/services', async(req, res)=>{
-          const result = await servicesCollection.find().toArray()
-          res.send(result)
+        app.get('/services', async (req, res) => {
+            const result = await servicesCollection.find().toArray()
+            res.send(result)
         })
         app.get('/services/:id', async (req, res) => {
             const id = req.params.id;
@@ -49,18 +49,20 @@ async function run() {
             const result = await servicesCollection.find(query).toArray();
             res.send(result);
         });
+
+
         //the add services
-        app.post('/services', async(req, res)=>{
+        app.post('/services', async (req, res) => {
             const addService = req.body;
             const result = await servicesCollection.insertOne(addService);
             res.send(result)
         })
 
         // update the on service
-        app.patch('/services/:id', async(req, res)=>{
+        app.patch('/services/:id', async (req, res) => {
             const id = req.params.id;
             const data = req.body;
-            const filter = {_id : new ObjectId(id)};
+            const filter = { _id: new ObjectId(id) };
             const updatedDoc = {
                 $set: data
             }
@@ -69,9 +71,9 @@ async function run() {
         })
 
         // delete the service
-        app.delete('/services/:id', async(req, res)=>{
+        app.delete('/services/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id : new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await servicesCollection.deleteOne(query)
             res.send(result)
         })
@@ -79,17 +81,45 @@ async function run() {
 
         //Purchase now apis 
 
-        app.get('/serviceStatus', async(req, res)=>{
+        app.get('/serviceStatus', async (req, res) => {
             const result = await serviceStatusCollection.find().toArray()
             res.send(result)
         })
+        
+        app.get('/serviceStatus/:email', async (req, res) => {
+            const isBuyer = req.query.buyer;
+            const email = req.params.email;
+            console.log(isBuyer);
+            let query = {}
+            if (isBuyer) {
+                query.buyer = email
+            } else {
+                query.email = email
+            }
 
-        app.post('/serviceStatus', async(req, res)=>{
+            const result = await serviceStatusCollection.find(query).toArray()
+            res.send(result)
+        })
+
+
+        app.put('/serviceStatus/:id', async (req, res) => {
+            const { id } = req.params;
+            const { serviceStatus } = req.body;
+            const result = await serviceStatusCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $set: { serviceStatus } }
+            );
+            res.send(result);
+
+        });
+
+
+
+        app.post('/serviceStatus', async (req, res) => {
             const addServicestatus = req.body;
             const result = await serviceStatusCollection.insertOne(addServicestatus);
             res.send(result)
         })
-// git rm - r--cached node_modules.env
 
 
 
