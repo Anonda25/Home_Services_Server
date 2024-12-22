@@ -24,6 +24,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const servicesCollection = client.db("ServiceDB").collection("Services");
+        const serviceStatusCollection = client.db("ServiceDB").collection("serviceStatus");
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         // Send a ping to confirm a successful connection
@@ -74,6 +75,21 @@ async function run() {
             const result = await servicesCollection.deleteOne(query)
             res.send(result)
         })
+
+
+        //Purchase now apis 
+
+        app.get('/serviceStatus', async(req, res)=>{
+            const result = await serviceStatusCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.post('/serviceStatus', async(req, res)=>{
+            const addServicestatus = req.body;
+            const result = await serviceStatusCollection.insertOne(addServicestatus);
+            res.send(result)
+        })
+// git rm - r--cached node_modules.env
 
 
 
