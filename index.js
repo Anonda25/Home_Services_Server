@@ -17,19 +17,21 @@ app.use(express.json())
 app.use(cookieParser())
 
 
-const verifyToken =(req, res, next)=>{
-const token = req?.cookies?.token
-    if(!token){
-        return res.status(401).send({message : 'unAuthorize access'})
+const verifyToken = (req, res, next) => {
+    console.log(req.params.email);
+    const token = req?.cookies?.token;
+    console.log(token);
+    if (!token) {
+        return res.status(401).send({ message: 'unAuthorize access' })
     }
-    jwt.verify(token, process.env.JWT_SECRET,  (err, decoded)=> {
-        if(err){
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
             return res.status(401).send({ message: 'unAuthorize access' })
         }
-        next()
-    });
-    
-    
+        req.user = decoded
+    })
+    next()
+
 }
 
 const uri = `mongodb+srv://${process.env.USER_ID}:${process.env.USER_PASS}@cluster0.ls3lx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -59,16 +61,24 @@ async function run() {
         app.post('/jwt', async (req, res) => {
             const user = req.body;
             const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '10h' })
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: false
-            })
+            res
+                .cookie('token', token, {
+                    httpOnly: true,
+                    secure: false
+                })
 
                 .send({ success: true })
         })
 
 
-        
+        app.post('/logout', (req, res) => {
+            res
+                .clearCookie('token', {
+                    httpOnly: true,
+                    secure: false
+                })
+                .send({ success: true })
+        })
 
 
         // get the servise/serch
@@ -132,9 +142,14 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/serviceStatus/:email', verifyToken,  async (req, res) => {
+        app.get('/serviceStatus/:email', verifyToken, async (req, res) => {
+            const decodedEmail = req.user?.email;
             const isBuyer = req.query.buyer;
             const email = req.params.email;
+            if (decodedEmail !== email){
+                return res.status(403).send({message:'forbidden access'})
+            }
+
             let query = {}
             if (isBuyer) {
                 query.buyer = email
