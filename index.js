@@ -32,7 +32,12 @@ async function run() {
 
         // get the servise
         app.get('/services', async (req, res) => {
-            const result = await servicesCollection.find().toArray()
+            const { sherchprams } = req.query;
+            let option = {}
+            if (sherchprams) {
+                option = { name: { $regex: sherchprams, $options: 'i' } }
+            }
+            const result = await servicesCollection.find(option).toArray()
             res.send(result)
         })
         app.get('/services/:id', async (req, res) => {
@@ -85,7 +90,7 @@ async function run() {
             const result = await serviceStatusCollection.find().toArray()
             res.send(result)
         })
-        
+
         app.get('/serviceStatus/:email', async (req, res) => {
             const isBuyer = req.query.buyer;
             const email = req.params.email;
