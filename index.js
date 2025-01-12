@@ -11,7 +11,8 @@ const app = express()
 
 app.use(cors({
     origin: ['http://localhost:5173',
-        'https://homerepier.netlify.app'
+        'https://homerepier.netlify.app',
+        'https://home-services1.netlify.app/'
 
     ],
     credentials: true
